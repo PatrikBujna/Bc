@@ -1,16 +1,95 @@
-{% extends "layout.html" %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>My Naše Novosti - Futbalnet</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
 
-{% block body %}
-  <h1>Add a user</h1>
-  <form action="{{ url_for('user') }}" method="post">
-    <label for="name">Name</label>
-    <input id="name" type="text" name="name" placeholder="John Smith" required />
-    <label for="email">Email</label>
-    <input id="email" type="email" name="email" placeholder="j.smith@example.com" required />
-    <button type="submit">Save</button>
-  </form>
-  <h2>List of users</h2>
-  {% for u in users %}
-    <p>{{ u.name }} -- {{ u.email }}</p>
-  {% endfor %}
-{% endblock %}
+        <style>
+            .card{ margin-bottom: 20px}
+
+            .jumbotron{ background: #B8DCB1}
+
+            html {
+                position: relative;
+                min-height: 100%;
+            }
+
+            .footer {
+                position: absolute;
+                bottom: 0;
+                width: 100%;
+                height: 60px; /* Set the fixed height of the footer here */
+                line-height: 60px; /* Vertically center the text there */
+                background-color: #B8DCB1;
+            }
+        </style>
+    </head>
+
+    <body>
+        <!-- header -->
+        <div class="jumbotron text-center">
+            <h1>My Naše Novosti - Futbalnet</h1>
+        </div>
+        <!-- header koniec -->
+
+        <form action="{{ url_for('vystup') }}" method="post">
+            <!-- osma liga -->
+            <div class="mx-auto" style="width: 40%;">
+                <div class="card">
+                    <div class="card-header">
+                        <center><h3><label><input type="radio" name="liga" value="osem">&nbsp Ôsma liga</label></h3></center>
+                    </div>
+                    <div class="card-block">
+                        <blockquote class="card-blockquote">
+                            <center><p><input type="checkbox" name="checkbox" value="skratkaGoly">&nbsp Skratka krstného mena pre góly</p></center>
+                        </blockquote>
+                    </div>
+                </div>
+                <!-- osma liga konec -->
+
+                <!-- siedma liga -->
+                <div class="card">
+                    <div class="card-header">
+                        <center><h3><label><input type="radio" name="liga" value="sedem">&nbsp Siedma liga</label></h3></center>
+                    </div>
+                </div>
+                <!-- siedma liga konec-->
+
+                <!-- piata liga -->
+                <div class="card">
+                    <div class="card-header">
+                        <center><h3><label><input type="radio" name="liga" value="pat">&nbsp Piata liga</label></h3></center>
+                    </div>
+                    <div class="card-block">
+                        <blockquote class="card-blockquote">
+                            <center><p><input type="checkbox" name="checkbox" value="skratkaZostavy">&nbsp Skratka krstného mena pre zostavy</p></center>
+                        </blockquote>
+                    </div>
+                </div>
+                <!-- piata liga konec -->
+
+                <center><h3>Link:</h3></center>
+                <input type="text" class="form-control" name="url">
+                <button style="margin-bottom: 100px;" type="submit" class="btn btn-default btn-sm btn-block">Odoslat</button>
+            </div>
+        </form>
+
+        <!-- footer -->
+        <footer class="footer">
+            <span class="text-muted">
+                <center>
+                    <div class="container">
+                        <p>© Patrik Bujna &nbsp<span class="glyphicon glyphicon-envelope"></span>&nbsp bujnapato@gmail.com</p>
+                    </div>
+                </center>
+            </span>
+        </footer>
+        <!-- footer koniec -->
+
+    </body>
+</html>
