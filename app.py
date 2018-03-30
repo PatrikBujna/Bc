@@ -8,18 +8,13 @@ app = Flask(__name__)
 def vystup():
     url = request.form['url']
     liga = request.form['liga']
-    skratkaGoly = False
     skratkaZostavy = False
 
-    '''
     if 'checkbox' in request.form:
-        if request.form['checkbox'] == 'skratkaGoly':
-            skratkaGoly = True
         if request.form['checkbox'] == 'skratkaZostavy':
             skratkaZostavy = True
-    '''
 
-    return render_template('vystup.html', vystup = main.getStringVystup(url, liga, True, True))
+    return render_template('vystup.html', vystup = main.getStringVystup(url, liga, skratkaZostavy))
 
 @app.route('/')
 def index():
@@ -27,4 +22,4 @@ def index():
 
 if __name__ == '__main__':
   port = int(os.environ.get('PORT', 5000))
-  app.run(host='0.0.0.0', port=port, debug=True)
+  app.run(host='0.0.0.0', port=port)

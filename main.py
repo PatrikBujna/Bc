@@ -12,11 +12,17 @@ def nacitanieURLs(sutazURL):
     htmltext = htmlfile.read()
 
     #ziskanie url zapasov
-    result = soup.find_all('div', {"class" : "result"})
+    match = soup.find_all('div', {"class" : "match-com-mobile"})
     urls = []
-    for i in result:
-        temp = i.attrs['onclick']
-        urls.append(temp[temp.find("='")+2 : -2])
+    for i in match:
+        temp = i.find('span', {"class": "color-success"})
+        if temp is not None:
+            temp = temp.get_text()
+
+        if temp == 'Ukončený':
+            temp = i.attrs['onclick']
+            urls.append(temp[temp.find("='")+2 : -2])
+
     return urls
 
 def getStringSuperi(soup):
@@ -47,10 +53,12 @@ def nacitajZostavy(skratky, playersList):
             hostia.append(str(x.get_text()).replace(" (C)", ""))
             prvy = True
 
+    frekventovaneD = nacitajFrekventovane(domaci)
+    frekventovaneH = nacitajFrekventovane(hostia)
     if not skratky:
-        zostavy = [domaci, hostia]
+        zostavy = [urobBezSkratiek(domaci, frekventovaneD), urobBezSkratiek(hostia,frekventovaneH)]
     else:
-        zostavy = [urobSkratky(domaci, nacitajFrekventovane(domaci)), urobSkratky(hostia, nacitajFrekventovane(hostia))]
+        zostavy = [urobSkratky(domaci, frekventovaneD), urobSkratky(hostia, frekventovaneH)]
 
     return zostavy
 
@@ -64,9 +72,25 @@ def nacitajFrekventovane(arr):
     frekventovane = []
     for i in pocetP:
         if pocetP[i] > 1:
-            frekventovane.append([i])
+            frekventovane.append(i)
 
     return frekventovane
+
+def urobBezSkratiek(zostava, frekventovane):
+    bezSkr = []
+    for hrac in zostava:
+        hrac = hrac.split()
+        bezSkr.append(hrac[-1])
+
+    for hrac in frekventovane:
+        count = 0
+        while (count < len(bezSkr)):
+            if ''.join(hrac) == bezSkr[count]:
+                x = str(zostava[count]).split()
+                skratene = x[0][:1] + ". " + ''.join(x[1:])
+                bezSkr[count] = skratene
+            count += 1
+    return bezSkr
 
 def urobSkratky(arr, frekventovane):
     meno = ""
@@ -107,32 +131,25 @@ def nacitajZaklad(playersList, zostavy, skratky):
     for x in playersList.find_all('div', {"class": "action fl ac-striedanie"}):
         striedania.append(x['title'])
 
+    frekventovane = nacitajFrekventovane(domaci) + nacitajFrekventovane(hostia)
     if not skratky:
-        zaklad = [nacitajStriedania(zakladDomaci, striedania, skratky), nacitajStriedania(zakladHostia, striedania, skratky)]
+        striedania = upravStriedaniaBezSkr(striedania, frekventovane)
+        zaklad = [nacitajStriedania(zakladDomaci, striedania), nacitajStriedania(zakladHostia, striedania)]
     else:
-        frekventovane = nacitajFrekventovane(domaci) + nacitajFrekventovane(hostia)
-        striedania = upravStriedania(striedania, frekventovane)
-        zaklad = [nacitajStriedania(zakladDomaci, striedania, skratky), nacitajStriedania(zakladHostia, striedania, skratky)]
+        striedania = upravStriedaniaSkr(striedania, frekventovane)
+        zaklad = [nacitajStriedania(zakladDomaci, striedania), nacitajStriedania(zakladHostia, striedania)]
 
     return zaklad
 
-def nacitajStriedania(zaklad, striedania, skratky):
-    if not skratky:
-        for i in striedania:
-            for x, hrac in enumerate(zaklad):
-                if str(hrac) == i[:i.find("<")-1]:
-                    index = i.find(" (")
-                    i = str(i).replace(" <->", i[i.find(" ("):i.find(")")]).replace("'", ".")
-                    zaklad[x] = i[:index] + ")"
-    else:
-        for i in striedania:
-            for x, hrac in enumerate(zaklad):
-                if str(hrac) == i[:i.find("(") - 1]:
-                    zaklad[x] = i
+def nacitajStriedania(zaklad, striedania):
+    for i in striedania:
+        for x, hrac in enumerate(zaklad):
+            if str(hrac) == i[:i.find("(") - 1]:
+                zaklad[x] = i
 
     return zaklad
 
-def upravStriedania(striedania, frekvetovane):
+def upravStriedaniaSkr(striedania, frekvetovane):
     mena = []
     casy = []
     count = 0
@@ -161,6 +178,47 @@ def upravStriedania(striedania, frekvetovane):
 
     return striedania
 
+def upravHracov(mena, frekventovane):
+    for i, hrac in enumerate(mena):
+        x = hrac.split()
+        mena[i] = x[-1]
+
+    for frek in frekventovane:
+        for i, hrac in enumerate(mena):
+            x = hrac.split()
+            if frek == x[-1]:
+                mena[i] = x[0][:1] + ". " + ''.join(x[0:])
+
+    return mena
+
+def upravStriedaniaBezSkr(striedania, frekventovane):
+    mena = []
+    casy = []
+    count = 0
+
+    while (count < len(striedania)):
+        temp = striedania[count]
+        prvy = temp[:temp.find(" <")]
+        mena.append(prvy)
+
+        druhy = temp[temp.find(">") + 2:temp.find(" (")]
+        mena.append(druhy)
+
+        cas = str(temp[temp.find(" ("):temp.find(")")]).replace("'", ". ")
+        casy.append(cas)
+
+        count += 1
+
+    upravene = upravHracov(mena, frekventovane)
+    count = 0
+    i = 0
+    while (count < len(striedania)):
+        striedania[count] = upravene[i] + casy[count] + upravene[i + 1] + ")"
+        count += 1
+        i += 2
+
+    return striedania
+
 def getStringZaklad(zaklad):
     domaci = "DOMÁCI: "
     hostia = "HOSTIA: "
@@ -170,7 +228,11 @@ def getStringZaklad(zaklad):
     for i in zaklad[1]:
         hostia += i + ", "
 
-    return str((domaci[:-2].replace(", ", " - ", 1) + "\n" + hostia[:-2].replace(", ", " - ", 1)).replace("(C)", "")).replace(" ,", ",")
+    zaklad[0] = str((domaci[:-2].replace(", ", " - ", 1)).replace("(C)", "")).replace(" ,", ",")
+    zaklad[1] = str((hostia[:-2].replace(", ", " - ", 1)).replace("(C)", "")).replace(" ,", ",")
+
+
+    return zaklad
 
 def rreplace(s, old, new, occurrence):
     li = s.rsplit(old, occurrence)
@@ -267,7 +329,6 @@ def getStringGoly(playersList, zostavy, skratky):
     # rozdelenie golov na dve polia
     golyD = []
     golyH = []
-    nasiel = False
 
     if skratky:
         goly = urobSkratkyGoly(domaci, goly)
@@ -282,56 +343,77 @@ def getStringGoly(playersList, zostavy, skratky):
                 if hrac == gol:
                     if i.find("vl. gol") > -1:
                         golyH.append(i)
-                        golyH.sort()
                     else:
                         golyD.append(i)
-                        nasiel = True
                         break
 
             for hrac in hostia:
                 if hrac == gol:
                     if i.find("vl. gol") > -1:
                         golyD.append(i)
-                        golyD.sort()
                     else:
                         golyH.append(i)
-                        nasiel = True
                         break
-            nasiel = False
     else:
         for i in goly:
             if i.find("(") > -1:
                 gol = i[i.find(".") + 2: i.find("(") - 1]
             else:
                 gol = i[i.find(".") + 2:]
+            cas = i[:i.find(".")+2]
 
             for hrac in domaci:
-                if hrac == gol:
-                    if i.find("vl. gol") > -1:
-                        golyH.append(i)
-                        golyH.sort()
-                    else:
-                        golyD.append(i)
-                        nasiel = True
-                        break
+                x = hrac.split()
+                y = gol.split()
+                if hrac.find('.') > -1:
+                    if x[-1] == y[-1] and x[0][:1] == y[0][:1]:
+                        gol = cas + ''.join(x)
+                        if i.find("vl. gol") > -1:
+                            golyH.append(gol)
+                            break
+                        else:
+                            golyD.append(gol)
+                            break
+                else:
+                    if x[-1] == y[-1]:
+                        gol = cas + hrac
+                        if i.find("vl. gol") > -1:
+                            golyH.append(gol)
+                            break
+                        else:
+                            golyD.append(gol)
+                            break
 
             for hrac in hostia:
-                if hrac == gol:
-                    if i.find("vl. gol") > -1:
-                        golyD.append(i)
-                        golyD.sort()
-                    else:
-                        golyH.append(i)
-                        nasiel = True
-                        break
-            nasiel = False
-
+                x = hrac.split()
+                y = gol.split()
+                if hrac.find('.') > -1:
+                    if x[-1] == y[-1] and x[0][:1] == y[0][:1]:
+                        gol = cas + ''.join(x)
+                        if i.find("vl. gol") > -1:
+                            golyD.append(gol)
+                            break
+                        else:
+                            golyH.append(gol)
+                            break
+                else:
+                    if x[-1] == y[-1]:
+                        gol = cas + hrac
+                        if i.find("vl. gol") > -1:
+                            golyD.append(gol)
+                            break
+                        else:
+                            golyH.append(gol)
+                            break
 
     #ak dal jeden hrac viac ako jeden gol, uprav goly
     if len(golyD) > 1:
         golyD = nacitajViacAkoJedenGol(golyD)
     if len(golyH) > 1:
         golyH = nacitajViacAkoJedenGol(golyH)
+
+    golyD = sorted(golyD, key=lambda x : int(x[:x.find(".")]))
+    golyH = sorted(golyH, key=lambda x : int(x[:x.find(".")]))
 
     golyDstr = golyHstr= ""
 
@@ -378,7 +460,7 @@ def getStringDivaci(soup):
     return divaci[13:] + " divákov"
 
 #######################################################################################################################
-def main(soup, liga, skratkaGoly, skratkaZostavy):
+def main(soup, liga, skratkaZostavy):
     playersList = soup.find('table', {"class": "table table-match"})
 
     zapas = []
@@ -387,27 +469,23 @@ def main(soup, liga, skratkaGoly, skratkaZostavy):
     zapas.append(superi + " " + vysledok)
 
     if liga == 'osem':
-        if skratkaGoly:
-            skratkaZostavy = True
         zostavy = nacitajZostavy(skratkaZostavy, playersList)
-        zapas.append(getStringGoly(playersList, zostavy, skratkaGoly)[:-2])
+        zapas.append(getStringGoly(playersList, zostavy, skratkaZostavy)[:-2])
 
     if liga == 'sedem':
-        skratkaGoly = skratkaZostavy = True
         rozhodca = getStringRozhodca(soup)
         divaci = getStringDivaci(soup)
         zostavy = nacitajZostavy(skratkaZostavy, playersList)
-        zapas.append(getStringGoly(playersList, zostavy, skratkaGoly) + str(rozhodca) + ", " + str(divaci))
+        zapas.append(getStringGoly(playersList, zostavy, skratkaZostavy) + str(rozhodca) + ", " + str(divaci))
 
     if liga == 'pat':
-        if skratkaZostavy:
-            skratkaGoly = True
         rozhodca = getStringRozhodca(soup)
         divaci = getStringDivaci(soup)
 
         zostavy = nacitajZostavy(skratkaZostavy, playersList)
-        zapas.append(getStringGoly(playersList, zostavy, skratkaGoly)+ str(rozhodca) + ", " + str(divaci))
+        zapas.append(getStringGoly(playersList, zostavy, skratkaZostavy)+ str(rozhodca) + ", " + str(divaci))
         zapas.append(getStringZaklad(nacitajZaklad(playersList, zostavy, skratkaZostavy)))
+
 
         karty = getStringKarty(playersList)
         if karty != None:
@@ -415,7 +493,7 @@ def main(soup, liga, skratkaGoly, skratkaZostavy):
 
     return zapas
 
-async def async_crawler(urls, liga, skratkaGoly, skratkaZostavy):
+async def async_crawler(urls, liga, skratkaZostavy):
     loop = asyncio.get_event_loop()
     futures = [
         loop.run_in_executor(None, urlopen, url)
@@ -425,11 +503,11 @@ async def async_crawler(urls, liga, skratkaGoly, skratkaZostavy):
     vystup = []
     for index, response in enumerate(await asyncio.gather(*futures)):
         soup = BeautifulSoup(response.read(), 'html.parser')
-        vystup.append(main(soup, liga, skratkaGoly, skratkaZostavy))
+        vystup.append(main(soup, liga, skratkaZostavy))
     return vystup
 
-def getStringVystup(url, liga, skratkaGoly, skratkaZostavy):
+def getStringVystup(url, liga, skratkaZostavy):
     urls = nacitanieURLs(url)
     loop = asyncio.get_event_loop()
 
-    return loop.run_until_complete(async_crawler(urls, liga, skratkaGoly, skratkaZostavy))
+    return loop.run_until_complete(async_crawler(urls, liga, skratkaZostavy))

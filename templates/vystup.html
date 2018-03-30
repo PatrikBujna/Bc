@@ -6,12 +6,19 @@
 </head>
 <body>
     <h1>Vystup</h1>
-    {% for x in vystup %}
-        {% for y in x %}
+    {% for zapas in vystup %}
+        {% for riadok in zapas %}
             {% if loop.index == 1 %}
-                <b> {{ y }} </b>
+                <b> {{ riadok }} </b>
             {% else %}
-                {{ y }}
+                {% if loop.index == 3 %}
+                    {% for zostava in riadok %}
+                        {{ zostava }}
+                        <br>
+                    {% endfor %}
+                {% else %}
+                    {{ riadok }}
+                {% endif %}
             {% endif %}
             <br>
         {% endfor %}
