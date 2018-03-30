@@ -34,6 +34,9 @@ def getStringSuperi(soup):
 def getStringVysledok(soup):
     skore = str(soup.find('div', {"class": "score"}).get_text()).strip('\r\n')
     skore = ((skore[:skore.find("(")-1]) + (skore[skore.find("("):skore.find(")")+1])).rstrip('\n')
+
+    x = skore.split()
+    skore = ''.join(x)
     if (skore[skore.find("(")-1:skore.find("(")]).isdigit():
         return skore.replace("(", " (")
     else:
@@ -511,3 +514,13 @@ def getStringVystup(url, liga, skratkaZostavy):
     loop = asyncio.get_event_loop()
 
     return loop.run_until_complete(async_crawler(urls, liga, skratkaZostavy))
+
+vystup = getStringVystup('http://obfz-nitra.futbalnet.sk/sutaz/2105/?part=3135&round=62199', 'pat', False)
+
+for zapas in vystup:
+    for i, riadok in enumerate(zapas):
+        if i == 2:
+            for zostava in riadok:
+                print(zostava)
+        else:
+            print(riadok)
