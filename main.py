@@ -249,27 +249,21 @@ def nacitajViacAkoJedenGol(goly, liga):
         else:
             mena.append(item[item.find(".") + 2:])
 
+
+
     pocet = Counter(mena)
     frekventovane = []
     for i in pocet:
         if pocet[i] > 1:
             frekventovane.append([i, pocet[i]])
 
-    pk = []
     if liga=='osem':
+        mena = []
         for i, item in enumerate(goly):
-            if item.find("(z 11m)") > -1:
-                pk.append(item[item.find(".") + 2:])
-            else:
-                mena.append(item[item.find(".") + 2:])
-
-        pocetPk = Counter(pk)
+            mena.append(item[item.find(".") + 2:])
         pocet = Counter(mena)
-
-        print(pocetPk)
-        print(pocet)
-
         goly = []
+
         for i in pocet:
             if pocet[i] > 1:
                 goly.append(str(i)+ " " + str(pocet[i]))
