@@ -1,36 +1,5 @@
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <title>My Naše Novosti - Futbalnet</title>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
-        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
-
-        <style>
-            .card{ margin-bottom: 20px}
-
-            .jumbotron{ background: #B8DCB1}
-
-            html {
-                position: relative;
-                min-height: 100%;
-            }
-
-            .footer {
-                position: absolute;
-                bottom: 0;
-                width: 100%;
-                height: 60px; /* Set the fixed height of the footer here */
-                line-height: 60px; /* Vertically center the text there */
-                background-color: #B8DCB1;
-            }
-        </style>
-    </head>
-
-    <body>
+{% extends 'layout.html' %}
+    {% block body %}
         <!-- header -->
         <div class="jumbotron text-center">
             <h1>My Naše Novosti - Futbalnet</h1>
@@ -78,23 +47,4 @@
                 <button style="margin-bottom: 100px;" type="submit" class="btn btn-default btn-sm btn-block">Odoslat</button>
             </div>
         </form>
-
-        <!-- footer -->
-        <footer class="footer">
-            <span class="text-muted">
-                <center>
-                    <div class="container">
-                        <p>© Patrik Bujna, 2018</p>
-                    </div>
-                </center>
-            </span>
-        </footer>
-        <!-- footer koniec -->
-
-        <script>
-          (function (w,i,d,g,e,t,s) {w[d] = w[d]||[];t= i.createElement(g);
-            t.async=1;t.src=e;s=i.getElementsByTagName(g)[0];s.parentNode.insertBefore(t, s);
-          })(window, document, '_gscq','script','//widgets.getsitecontrol.com/130860/script.js');
-    </script>
-    </body>
-</html>
+    {% endblock %}

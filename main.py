@@ -241,7 +241,7 @@ def rreplace(s, old, new, occurrence):
     li = s.rsplit(old, occurrence)
     return new.join(li)
 
-def nacitajViacAkoJedenGol(goly):
+def nacitajViacAkoJedenGol(goly, liga):
     mena = []
     for i, item in enumerate(goly):
         if item.find("(z 11m)") > -1:
@@ -255,23 +255,44 @@ def nacitajViacAkoJedenGol(goly):
         if pocet[i] > 1:
             frekventovane.append([i, pocet[i]])
 
-    viacGolov = ""
-    zmaz = []
-    for i in frekventovane:
-        for j in goly:
-            if j[j.find(".") + 2:] == i[0]:
-                viacGolov += j[:j.find(".") + 1] + ", "
-                zmaz.append(j)
+    pk = []
+    if liga=='osem':
+        for i, item in enumerate(goly):
+            if item.find("(z 11m)") > -1:
+                pk.append(item[item.find(".") + 2:])
+            else:
+                mena.append(item[item.find(".") + 2:])
 
-        for j in zmaz:
-            goly.remove(j)
-        zmaz = []
+        pocetPk = Counter(pk)
+        pocet = Counter(mena)
 
-        viacGolov = viacGolov[:-2] + " "
-        viacGolov += i[0]
-        viacGolov = rreplace(viacGolov, ",", " a", 1)
-        goly.append(viacGolov)
+        print(pocetPk)
+        print(pocet)
+
+        goly = []
+        for i in pocet:
+            if pocet[i] > 1:
+                goly.append(str(i)+ " " + str(pocet[i]))
+            else:
+                goly.append(str(i))
+    else:
         viacGolov = ""
+        zmaz = []
+        for i in frekventovane:
+            for j in goly:
+                if j[j.find(".") + 2:] == i[0]:
+                    viacGolov += j[:j.find(".") + 1] + ", "
+                    zmaz.append(j)
+
+            for j in zmaz:
+                goly.remove(j)
+            zmaz = []
+
+            viacGolov = viacGolov[:-2] + " "
+            viacGolov += i[0]
+            viacGolov = rreplace(viacGolov, ",", " a", 1)
+            goly.append(viacGolov)
+            viacGolov = ""
 
     return goly
 
@@ -297,7 +318,7 @@ def urobSkratkyGoly(zostava, goly):
                         goly[i] = x[:x.find(".") + 1] + " " + hrac
     return goly
 
-def getStringGoly(playersList, zostavy, skratky):
+def getStringGoly(playersList, zostavy, skratky, liga):
     goly = []
     domaci = zostavy[0]
     hostia = zostavy[1]
@@ -409,14 +430,14 @@ def getStringGoly(playersList, zostavy, skratky):
                             golyH.append(gol)
                             break
 
-    #ak dal jeden hrac viac ako jeden gol, uprav goly
-    if len(golyD) > 1:
-        golyD = nacitajViacAkoJedenGol(golyD)
-    if len(golyH) > 1:
-        golyH = nacitajViacAkoJedenGol(golyH)
 
-    golyD = sorted(golyD, key=lambda x : int(x[:x.find(".")]))
-    golyH = sorted(golyH, key=lambda x : int(x[:x.find(".")]))
+    #ak dal jeden hrac viac ako jeden gol, uprav goly
+    golyD = nacitajViacAkoJedenGol(golyD, liga)
+    golyH = nacitajViacAkoJedenGol(golyH, liga)
+
+    if liga != 'osem':
+        golyD = sorted(golyD, key=lambda x : int(x[:x.find(".")]))
+        golyH = sorted(golyH, key=lambda x : int(x[:x.find(".")]))
 
     golyDstr = golyHstr= ""
 
@@ -473,26 +494,25 @@ def main(soup, liga, skratkaZostavy):
 
     if liga == 'osem':
         zostavy = nacitajZostavy(skratkaZostavy, playersList)
-        zapas.append(getStringGoly(playersList, zostavy, skratkaZostavy)[:-2])
+        zapas.append(getStringGoly(playersList, zostavy, skratkaZostavy, liga)[:-2])
 
     if liga == 'sedem':
         rozhodca = getStringRozhodca(soup)
         divaci = getStringDivaci(soup)
         zostavy = nacitajZostavy(skratkaZostavy, playersList)
-        zapas.append(getStringGoly(playersList, zostavy, skratkaZostavy) + str(rozhodca) + ", " + str(divaci))
+        zapas.append(getStringGoly(playersList, zostavy, skratkaZostavy, liga) + str(rozhodca) + ", " + str(divaci))
 
     if liga == 'pat':
         rozhodca = getStringRozhodca(soup)
         divaci = getStringDivaci(soup)
 
         zostavy = nacitajZostavy(skratkaZostavy, playersList)
-        zapas.append(getStringGoly(playersList, zostavy, skratkaZostavy)+ str(rozhodca) + ", " + str(divaci))
-        zapas.append(getStringZaklad(nacitajZaklad(playersList, zostavy, skratkaZostavy)))
-
-
         karty = getStringKarty(playersList)
         if karty != None:
-            zapas.append(karty)
+            zapas.append(getStringGoly(playersList, zostavy, skratkaZostavy, liga) + str(rozhodca) + ", " + str(divaci) + ", " + karty)
+        else:
+            zapas.append(getStringGoly(playersList, zostavy, skratkaZostavy, liga) + str(rozhodca) + ", " + str(divaci))
+        zapas.append(getStringZaklad(nacitajZaklad(playersList, zostavy, skratkaZostavy)))
 
     return zapas
 
@@ -511,11 +531,14 @@ async def async_crawler(urls, liga, skratkaZostavy):
 
 def getStringVystup(url, liga, skratkaZostavy):
     urls = nacitanieURLs(url)
-    loop = asyncio.get_event_loop()
 
-    return loop.run_until_complete(async_crawler(urls, liga, skratkaZostavy))
+    if len(urls) == 0:
+        return "Vo Vami zadanej súťaži sa neodohral ani jeden zápas."
+    else:
+        loop = asyncio.get_event_loop()
+        return loop.run_until_complete(async_crawler(urls, liga, skratkaZostavy))
 
-vystup = getStringVystup('http://obfz-nitra.futbalnet.sk/sutaz/2105/?part=3135&round=62199', 'pat', False)
+vystup = getStringVystup('http://www.zsfz.sk/sutaz/1875/?part=2782&round=60187&_ga=2.183526433.620017073.1522498947-1918376050.1517529522', 'osem', True)
 
 for zapas in vystup:
     for i, riadok in enumerate(zapas):

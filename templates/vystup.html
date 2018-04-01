@@ -1,30 +1,36 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Vystup</title>
-</head>
-<body>
-    <h1>Vystup</h1>
-    {% for zapas in vystup %}
-        {% for riadok in zapas %}
-            {% if loop.index == 1 %}
-                <b> {{ riadok }} </b>
-            {% else %}
-                {% if loop.index == 3 %}
-                    {% for zostava in riadok %}
-                        {{ zostava }}
-                        <br>
-                    {% endfor %}
-                {% else %}
-                    {{ riadok }}
-                {% endif %}
-            {% endif %}
-            <br>
-        {% endfor %}
-        <br>
-    {% endfor %}
+{% extends 'layout.html' %}
+    {% block body %}
+        <h1>Vystup</h1>
+        <div>
+        {% if vystup == 'Vo Vami zadanej súťaži sa neodohral žiaden zápas.' %}
+            <div class="container">
+              <div class="alert alert-danger">
+                <strong>Upozornenie!</strong> {{ vystup }} </a>
+              </div>
+            </div>
+        {% else %}
+            {% for zapas in vystup %}
+                {% for riadok in zapas %}
+                    {% if loop.index == 1 %}
+                        <b> {{ riadok }} </b>
+                    {% else %}
+                        {% if loop.index == 3 %}
+                            {% for zostava in riadok %}
+                                {{ zostava }}
+                                <br>
+                            {% endfor %}
+                        {% else %}
+                            {{ riadok }}
+                        {% endif %}
+                    {% endif %}
+                    <br>
+                {% endfor %}
+            {% endfor %}
+        {% endif %}
+        </div>
 
-
-</body>
-</html>
+        <form action="javascript:history.go(-1)">
+            <input type="submit" class="btn btn-success" value="Chcem spracovať ďalší zápas" />
+        </form>
+        <br><br>
+    {% endblock %}
