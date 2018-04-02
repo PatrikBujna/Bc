@@ -11,7 +11,7 @@ def vystup():
     skratkaZostavy = False
 
     if 'checkbox' in request.form:
-        if request.form['checkbox'] == 'skratkaZostavy':
+        if request.form['checkbox'] == 'skratka':
             skratkaZostavy = True
 
     return render_template('vystup.html', vystup = main.getStringVystup(url, liga, skratkaZostavy))
