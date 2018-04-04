@@ -519,20 +519,36 @@ async def async_crawler(urls, liga, skratky):
     return vystup
 
 def getStringVystup(url, liga, skratky):
-    urls = nacitanieURLs(url)
+    chyba = -1
+    if len(url) == 0:
+        chyba = 0
+    if len(liga) == 0:
+        chyba = 1
+    if len(url) == 0 and len(liga) == 0:
+        chyba = 2
+    if chyba > -1:
+        return chyba
 
+    urls = nacitanieURLs(url)
     if len(urls) == 0:
-        return "Vo Vami zadanej súťaži sa neodohral ani jeden zápas."
+        chyba = 3
+    if chyba > -1:
+        return chyba
     else:
         loop = asyncio.get_event_loop()
         return loop.run_until_complete(async_crawler(urls, liga, skratky))
 
-vystup = getStringVystup('http://www.zsfz.sk/sutaz/1885/?part=2784&round=63578', 'osem', True)
+'''
+vystup = getStringVystup('http://www.zsfz.sk/sutaz/1885/?part=2784&round=63578', 'sedem', True)
 
-for zapas in vystup:
-    for i, riadok in enumerate(zapas):
-        if i == 2:
-            for zostava in riadok:
-                print(zostava)
-        else:
-            print(riadok)
+if type(vystup) == int:
+    print(vystup)
+else:
+    for zapas in vystup:
+        for i, riadok in enumerate(zapas):
+            if i == 2:
+                for zostava in riadok:
+                    print(zostava)
+            else:
+                print(riadok)
+'''

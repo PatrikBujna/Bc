@@ -6,15 +6,22 @@ app = Flask(__name__)
 
 @app.route('/vystup', methods=['POST'])
 def vystup():
-    url = request.form['url']
-    liga = request.form['liga']
-    skratkaZostavy = False
+    url = liga = ''
+    skratky = False
 
-    if 'checkbox' in request.form:
-        if request.form['checkbox'] == 'skratka':
-            skratkaZostavy = True
+    f = request.form
+    for key in f.keys():
+        for value in f.getlist(key):
+            if key == 'url':
+                url = value
+            if key == 'liga':
+                liga = value
+            if key == 'checkbox':
+                skratky = True
 
-    return render_template('vystup.html', vystup = main.getStringVystup(url, liga, skratkaZostavy))
+
+
+    return render_template('vystup.html', vystup = main.getStringVystup(url, liga, skratky))
 
 @app.route('/')
 def index():
