@@ -19,8 +19,6 @@ def vystup():
             if key == 'checkbox':
                 skratky = True
 
-
-
     return render_template('vystup.html', vystup = main.getStringVystup(url, liga, skratky))
 
 @app.route('/')

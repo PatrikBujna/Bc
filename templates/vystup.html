@@ -1,6 +1,8 @@
 {% extends 'layout.html' %}
     {% block body %}
-        <center><h1>Vystup</h1></center>
+        <div class="jumbotron text-center">
+            <h1>Výstup</h1>
+        </div>
         <p class="vystup">
             {% set chyba = ["Nezadali ste URL zápasu.",
             "Nevybrali ste žiadnu ligu.",
@@ -29,6 +31,9 @@
                                 {% endfor %}
                             {% else %}
                                 {{ riadok }}
+                            {% endif %}
+                            {% if loop.index == vystup|length-1 and loop.index != 3%}
+                                <br>
                             {% endif %}
                         {% endif %}
                         <br>
