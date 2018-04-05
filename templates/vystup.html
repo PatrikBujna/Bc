@@ -4,9 +4,11 @@
             <h1>Výstup</h1>
         </div>
         <p class="vystup">
-            {% set chyba = ["Nezadali ste URL zápasu.",
+            {% set chyba = [
+            "Nezadali ste URL zápasu.",
             "Nevybrali ste žiadnu ligu.",
             "Nezadali ste URL ani nevybrali ligu.",
+            "URL zápasu nie je správna.",
             "Vo Vami zadanej súťaži sa neodohral žiaden zápas."] %}
 
             {% if vystup is number %}

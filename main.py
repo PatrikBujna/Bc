@@ -520,20 +520,26 @@ async def async_crawler(urls, liga, skratky):
 
 def getStringVystup(url, liga, skratky):
     chyba = -1
+
+    if url[:3] == 'www' and len(url) >2:
+        url = 'http://' + url
+
     if len(url) == 0:
-        chyba = 0
+        return 0
+
     if len(liga) == 0:
-        chyba = 1
+        return 1
+
     if len(url) == 0 and len(liga) == 0:
-        chyba = 2
-    if chyba > -1:
-        return chyba
+        return 2
+
+    if url[:7] != 'http://' or len(url) < 7:
+        return 3
 
     urls = nacitanieURLs(url)
     if len(urls) == 0:
-        chyba = 3
-    if chyba > -1:
-        return chyba
+        return 4
+
     else:
         loop = asyncio.get_event_loop()
         return loop.run_until_complete(async_crawler(urls, liga, skratky))
