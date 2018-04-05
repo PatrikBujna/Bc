@@ -518,9 +518,7 @@ async def async_crawler(urls, liga, skratky):
         vystup.append(main(soup, liga, skratky))
     return vystup
 
-def getStringVystup(url, liga, skratky):
-    chyba = -1
-
+def overVstupy(url, liga):
     if url[:3] == 'www' and len(url) >2:
         url = 'http://' + url
 
@@ -540,9 +538,16 @@ def getStringVystup(url, liga, skratky):
     if len(urls) == 0:
         return 4
 
+    return urls
+
+def getStringVystup(url, liga, skratky):
+    overenie = overVstupy(url, liga)
+    if type(overenie) is int:
+        return overenie
     else:
-        loop = asyncio.get_event_loop()
-        return loop.run_until_complete(async_crawler(urls, liga, skratky))
+        urls = overenie
+    loop = asyncio.get_event_loop()
+    return loop.run_until_complete(async_crawler(urls, liga, skratky))
 
 '''
 vystup = getStringVystup('http://www.zsfz.sk/sutaz/1885/?part=2784&round=63578', 'sedem', True)
