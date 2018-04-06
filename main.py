@@ -561,6 +561,7 @@ def getStringVystup(url, liga, skratky):
 
 vystup = getStringVystup('http://www.zsfz.sk/sutaz/1885/?part=2784&round=63578', 'osem', True)
 
+'''
 if type(vystup) == int:
     print(vystup)
 else:
@@ -571,3 +572,4 @@ else:
                     print(zostava)
             else:
                 print(riadok)
+'''
