@@ -4,6 +4,7 @@ from urllib.request import urlopen
 from bs4 import BeautifulSoup
 from collections import Counter
 import asyncio
+import re
 
 def nacitanieURLs(sutazURL):
     #pripojenie a nacitanie url sutaze
@@ -272,13 +273,17 @@ def nacitajViacAkoJedenGol(goly, liga):
             mena.append(item[item.find(".") + 2:])
         pocet = Counter(mena)
         goly = []
+        golyPocet = []
 
 
         for i in pocet:
+
             if pocet[i] > 1:
-                goly.append(str(i)+ " " + str(pocet[i]))
+                golyPocet.append(str(i)+ " " + str(pocet[i]))
             else:
                 goly.append(str(i))
+        goly = golyPocet + goly
+
     else:
         viacGolov = ""
         zmaz = []
@@ -352,6 +357,12 @@ def urobBezSkratkyGoly(zostava, goly):
             count += 1
     return bezSkr
 
+
+key_pat = re.compile(r"^(\D+)(\d+)$")
+def key(item):
+    m = key_pat.match(item)
+    return m.group(1), int(m.group(2))
+
 def getStringGoly(playersList, zostavy, skratky, liga):
     domaci = zostavy[0]
     hostia = zostavy[1]
@@ -422,11 +433,9 @@ def getStringGoly(playersList, zostavy, skratky, liga):
     golyD = nacitajViacAkoJedenGol(golyD, liga)
     golyH = nacitajViacAkoJedenGol(golyH, liga)
 
-    '''
     if liga != 'osem':
         golyD = sorted(golyD, key=lambda x : int(x[:x.find(".")]))
         golyH = sorted(golyH, key=lambda x : int(x[:x.find(".")]))
-    '''
 
     golyDstr = golyHstr= ""
 
@@ -549,8 +558,8 @@ def getStringVystup(url, liga, skratky):
     loop = asyncio.get_event_loop()
     return loop.run_until_complete(async_crawler(urls, liga, skratky))
 
-'''
-vystup = getStringVystup('http://www.zsfz.sk/sutaz/1885/?part=2784&round=63578', 'sedem', True)
+
+vystup = getStringVystup('http://www.zsfz.sk/sutaz/1885/?part=2784&round=63578', 'osem', True)
 
 if type(vystup) == int:
     print(vystup)
@@ -562,4 +571,3 @@ else:
                     print(zostava)
             else:
                 print(riadok)
-'''
