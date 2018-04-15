@@ -4,27 +4,6 @@ from urllib.request import urlopen
 from bs4 import BeautifulSoup
 from collections import Counter
 import asyncio
-import re
-
-def nacitanieURLs(sutazURL):
-    #pripojenie a nacitanie url sutaze
-    htmlfile = urlopen(sutazURL)
-    soup = BeautifulSoup(htmlfile, "html.parser")
-    htmltext = htmlfile.read()
-
-    #ziskanie url zapasov
-    match = soup.find_all('div', {"class" : "match-com-mobile"})
-    urls = []
-    for i in match:
-        temp = i.find('span', {"class": "color-success"})
-        if temp is not None:
-            temp = temp.get_text()
-
-        if temp == 'Ukončený':
-            temp = i.attrs['onclick']
-            urls.append(temp[temp.find("='")+2 : -2])
-
-    return urls
 
 def getStringSuperi(soup):
     muzstva = soup.find_all('div', {"class": "team-title"})
@@ -107,10 +86,10 @@ def urobBezSkratiek(zostava, frekventovane):
             count += 1
     return bezSkr
 
-def urobSkratky(arr, frekventovane):
+def urobSkratky(zostava, frekventovane):
     meno = ""
     skratene = []
-    for i in arr:
+    for i in zostava:
         x = i.split()
         meno = str(x[0][0:1]) + ". "
         x = x[1:]
@@ -123,7 +102,7 @@ def urobSkratky(arr, frekventovane):
         while (count < len(skratene)):
             x = skratene[count].split()
             if ''.join(i) == x[len(x) - 1]:
-                skratene[count] = arr[count]
+                skratene[count] = zostava[count]
             count += 1
 
     return skratene
@@ -246,7 +225,6 @@ def getStringZaklad(zaklad):
     zaklad[0] = str((domaci[:-2].replace(", ", " - ", 1)).replace("(C)", "")).replace(" ,", ",")
     zaklad[1] = str((hostia[:-2].replace(", ", " - ", 1)).replace("(C)", "")).replace(" ,", ",")
 
-
     return zaklad
 
 def rreplace(s, old, new, occurrence):
@@ -274,7 +252,6 @@ def nacitajViacAkoJedenGol(goly, liga):
         pocet = Counter(mena)
         goly = []
         golyPocet = []
-
 
         for i in pocet:
 
@@ -356,12 +333,6 @@ def urobBezSkratkyGoly(zostava, goly):
             bezSkr[count] = skratene
             count += 1
     return bezSkr
-
-
-key_pat = re.compile(r"^(\D+)(\d+)$")
-def key(item):
-    m = key_pat.match(item)
-    return m.group(1), int(m.group(2))
 
 def getStringGoly(playersList, zostavy, skratky, liga):
     domaci = zostavy[0]
@@ -490,21 +461,18 @@ def main(soup, liga, skratky):
     vysledok = getStringVysledok(soup)
     zapas.append(superi + " " + vysledok)
 
+    zostavy = nacitajZostavy(skratky, playersList)
     if liga == 'osem':
-        zostavy = nacitajZostavy(skratky, playersList)
         zapas.append(getStringGoly(playersList, zostavy, skratky, liga)[:-2])
 
     if liga == 'sedem':
         rozhodca = getStringRozhodca(soup)
         divaci = getStringDivaci(soup)
-        zostavy = nacitajZostavy(skratky, playersList)
         zapas.append(getStringGoly(playersList, zostavy, skratky, liga) + str(rozhodca) + ", " + str(divaci))
 
     if liga == 'pat':
         rozhodca = getStringRozhodca(soup)
         divaci = getStringDivaci(soup)
-
-        zostavy = nacitajZostavy(skratky, playersList)
         karty = getStringKarty(playersList)
         if karty != None:
             zapas.append(getStringGoly(playersList, zostavy, skratky, liga) + str(rozhodca) + ", " + str(divaci) + ", " + karty)
@@ -549,6 +517,23 @@ def overVstupy(url, liga):
 
     return urls
 
+def nacitanieURLs(sutazURL):
+    htmlfile = urlopen(sutazURL)
+    soup = BeautifulSoup(htmlfile, "html.parser")
+
+    match = soup.find_all('div', {"class" : "match-com-mobile"})
+    urls = []
+    for i in match:
+        temp = i.find('span', {"class": "color-success"})
+        if temp is not None:
+            temp = temp.get_text()
+
+        if temp == 'Ukončený':
+            temp = i.attrs['onclick']
+            urls.append(temp[temp.find("='")+2 : -2])
+
+    return urls
+
 def getStringVystup(url, liga, skratky):
     overenie = overVstupy(url, liga)
     if type(overenie) is int:
@@ -557,19 +542,3 @@ def getStringVystup(url, liga, skratky):
         urls = overenie
     loop = asyncio.get_event_loop()
     return loop.run_until_complete(async_crawler(urls, liga, skratky))
-
-
-vystup = getStringVystup('http://www.zsfz.sk/sutaz/1885/?part=2784&round=63578', 'osem', True)
-
-'''
-if type(vystup) == int:
-    print(vystup)
-else:
-    for zapas in vystup:
-        for i, riadok in enumerate(zapas):
-            if i == 2:
-                for zostava in riadok:
-                    print(zostava)
-            else:
-                print(riadok)
-'''

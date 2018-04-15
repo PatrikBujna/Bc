@@ -5,7 +5,7 @@
         </div>
         <p class="vystup">
             {% set chyba = [
-            "Nezadali ste URL zápasu.",
+            "Nezadali ste URL súťaže.",
             "Nevybrali ste žiadnu ligu.",
             "Nezadali ste URL ani nevybrali ligu.",
             "URL zápasu nie je správna.",
@@ -35,14 +35,13 @@
                                 {{ riadok }}
                             {% endif %}
                             {% if loop.index == vystup|length-1 and loop.index != 3%}
-                                <br>
+
                             {% endif %}
                         {% endif %}
                         <br>
                     {% endfor %}
                 {% endfor %}
             {% endif %}
-
         </p>
 
         <center>
