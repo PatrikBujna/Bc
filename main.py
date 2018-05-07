@@ -235,7 +235,7 @@ def nacitajViacAkoJedenGol(goly, liga):
     mena = []
     for i, item in enumerate(goly):
         if item.find("(z 11m)") > -1:
-            mena.append(item[item.find(".") + 2:item.find("(")])
+            mena.append(item[item.find(".") + 2:item.find(" (")])
         else:
             mena.append(item[item.find(".") + 2:])
 
@@ -245,6 +245,8 @@ def nacitajViacAkoJedenGol(goly, liga):
         if pocet[i] > 1:
             frekventovane.append([i, pocet[i]])
 
+    bol = False
+    count = 0
     if liga=='osem':
         mena = []
         for i, item in enumerate(goly):
@@ -267,19 +269,26 @@ def nacitajViacAkoJedenGol(goly, liga):
         for i in frekventovane:
             for j in goly:
                 if j.find("(") > -1:
-                    if j[j.find(".") + 2 : j.find("(")] == i[0]:
+                    if j[j.find(".") + 2 : j.find(" (")] == i[0]:
                         viacGolov += j[:j.find(".") + 1] + ", "
                         zmaz.append(j)
+                        bol = True
+                        count+=1
+                        #TO DO: viac ako jeden gol z 11m
                 else:
                     if j[j.find(".") + 2:] == i[0]:
                         viacGolov += j[:j.find(".") + 1] + ", "
                         zmaz.append(j)
+
             for j in zmaz:
                 goly.remove(j)
             zmaz = []
 
             viacGolov = viacGolov[:-2] + " "
-            viacGolov += i[0]
+            if bol:
+                viacGolov += i[0] + " (" + str(count) + " z 11m)"
+            else:
+                viacGolov += i[0]
             viacGolov = rreplace(viacGolov, ",", " a", 1)
             goly.append(viacGolov)
             viacGolov = ""
@@ -547,7 +556,7 @@ def getStringVystup(url, liga, skratky):
     loop = asyncio.get_event_loop()
     return loop.run_until_complete(async_crawler(urls, liga, skratky))
 
-vystup = getStringVystup('http://www.zsfz.sk/sutaz/1885/', 'pat', True)
+vystup = getStringVystup('http://www.zsfz.sk/sutaz/1885/?part=2784&round=63583', 'pat', True)
 for i in vystup:
     for x in i:
         print(x)
