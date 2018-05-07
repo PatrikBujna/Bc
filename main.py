@@ -471,8 +471,16 @@ def main(soup, liga, skratky):
 
     zapas = []
     superi = getStringSuperi(soup)
+    if soup.find('div', {"class": "contumacy-image right"}) != None:
+        skore = (soup.find('div', {"class": "big color-default-a"})).get_text()
+        zapas.append(superi + " " + skore)
+        zapas.append("Kontumácia")
+        return zapas
+
     vysledok = getStringVysledok(soup)
     zapas.append(superi + " " + vysledok)
+
+
 
     zostavy = nacitajZostavy(skratky, playersList)
     if liga == 'osem':
@@ -556,7 +564,7 @@ def getStringVystup(url, liga, skratky):
     loop = asyncio.get_event_loop()
     return loop.run_until_complete(async_crawler(urls, liga, skratky))
 
-vystup = getStringVystup('http://www.zsfz.sk/sutaz/1885/?part=2784&round=63583', 'pat', True)
+vystup = getStringVystup('http://www.zsfz.sk/sutaz/1875/?part=2782&round=60192&_ga=2.83965145.1997757836.1525724166-385601246.1507458263', 'pat', True)
 for i in vystup:
     for x in i:
         print(x)
