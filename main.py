@@ -266,10 +266,14 @@ def nacitajViacAkoJedenGol(goly, liga):
         zmaz = []
         for i in frekventovane:
             for j in goly:
-                if j[j.find(".") + 2:] == i[0]:
-                    viacGolov += j[:j.find(".") + 1] + ", "
-                    zmaz.append(j)
-
+                if j.find("(") > -1:
+                    if j[j.find(".") + 2 : j.find("(")] == i[0]:
+                        viacGolov += j[:j.find(".") + 1] + ", "
+                        zmaz.append(j)
+                else:
+                    if j[j.find(".") + 2:] == i[0]:
+                        viacGolov += j[:j.find(".") + 1] + ", "
+                        zmaz.append(j)
             for j in zmaz:
                 goly.remove(j)
             zmaz = []
@@ -542,3 +546,8 @@ def getStringVystup(url, liga, skratky):
         urls = overenie
     loop = asyncio.get_event_loop()
     return loop.run_until_complete(async_crawler(urls, liga, skratky))
+
+vystup = getStringVystup('http://www.zsfz.sk/sutaz/1885/', 'pat', True)
+for i in vystup:
+    for x in i:
+        print(x)
