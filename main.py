@@ -233,6 +233,7 @@ def rreplace(s, old, new, occurrence):
 
 def nacitajViacAkoJedenGol(goly, liga):
     mena = []
+
     for i, item in enumerate(goly):
         if item.find("(z 11m)") > -1:
             mena.append(item[item.find(".") + 2:item.find(" (")])
@@ -244,7 +245,6 @@ def nacitajViacAkoJedenGol(goly, liga):
     for i in pocet:
         if pocet[i] > 1:
             frekventovane.append([i, pocet[i]])
-
     bol = False
     count = 0
     if liga=='osem':
@@ -262,10 +262,11 @@ def nacitajViacAkoJedenGol(goly, liga):
             else:
                 goly.append(str(i))
         goly = golyPocet + goly
-
     else:
+        #odtialto
         viacGolov = ""
         zmaz = []
+
         for i in frekventovane:
             for j in goly:
                 if j.find("(") > -1:
@@ -274,7 +275,6 @@ def nacitajViacAkoJedenGol(goly, liga):
                         zmaz.append(j)
                         bol = True
                         count+=1
-                        #TO DO: viac ako jeden gol z 11m
                 else:
                     if j[j.find(".") + 2:] == i[0]:
                         viacGolov += j[:j.find(".") + 1] + ", "
@@ -292,6 +292,9 @@ def nacitajViacAkoJedenGol(goly, liga):
             viacGolov = rreplace(viacGolov, ",", " a", 1)
             goly.append(viacGolov)
             viacGolov = ""
+            bol = False
+
+            print(goly)
 
     return goly
 
@@ -328,23 +331,21 @@ def urobBezSkratkyGoly(zostava, goly):
             gol = gol[:gol.find("(")].split()
             bezSkr.append(gol[-1])
 
-    count = 0
     if len(frekventovane) > 0:
         for hrac in frekventovane:
-            while (count < len(bezSkr)):
-                x = str(goly[count]).split()
-                if hrac == bezSkr[count]:
+            for i, tmp in enumerate(bezSkr):
+                x = str(goly[i]).split()
+
+                if hrac == bezSkr[i]:
                     skratene = x[0] + " " + x[1][:1] + ". " + ''.join(x[2:])
                 else:
                      skratene = x[0] + " " + ''.join(x[2:])
-                bezSkr[count] = skratene
-                count += 1
+                bezSkr[i] = skratene
     else:
-        while (count < len(bezSkr)):
-            x = str(goly[count]).split()
+        for i, tmp in enumerate(bezSkr):
+            x = str(goly[i]).split()
             skratene = x[0] + " " + ''.join(x[2:])
-            bezSkr[count] = skratene
-            count += 1
+            bezSkr[i] = skratene
     return bezSkr
 
 def getStringGoly(playersList, zostavy, skratky, liga):
@@ -480,8 +481,6 @@ def main(soup, liga, skratky):
     vysledok = getStringVysledok(soup)
     zapas.append(superi + " " + vysledok)
 
-
-
     zostavy = nacitajZostavy(skratky, playersList)
     if liga == 'osem':
         zapas.append(getStringGoly(playersList, zostavy, skratky, liga)[:-2])
@@ -564,7 +563,7 @@ def getStringVystup(url, liga, skratky):
     loop = asyncio.get_event_loop()
     return loop.run_until_complete(async_crawler(urls, liga, skratky))
 
-vystup = getStringVystup('http://www.zsfz.sk/sutaz/1875/?part=2782&round=60192&_ga=2.83965145.1997757836.1525724166-385601246.1507458263', 'pat', True)
-for i in vystup:
-    for x in i:
-        print(x)
+#vystup = getStringVystup('http://www.zsfz.sk/sutaz/1875/?part=2782&round=60196', 'pat', True)
+#for i in vystup:
+#    for x in i:
+#        print(x)
