@@ -294,8 +294,6 @@ def nacitajViacAkoJedenGol(goly, liga):
             viacGolov = ""
             bol = False
 
-            print(goly)
-
     return goly
 
 def urobSkratkyGoly(zostava, goly):
@@ -440,7 +438,7 @@ def getStringGoly(playersList, zostavy, skratky, liga):
     else:
         return ""
 
-def getStringKarty(playersList):
+def getStringCK(playersList):
     karty = []
     for x in playersList.find_all('div', {"class": "action fl ac-cervenakarta"}):
         karta = x['title']
@@ -448,8 +446,28 @@ def getStringKarty(playersList):
         karta = (karta[karta.find('(') + 1:karta.find(')')] + karta[:karta.find("(") - 1]).replace("'", ". ")
         karty.append(karta)
 
+    for x in playersList.find_all('div', {"class": "action fl ac-zlta2"}):
+        karta = x['title']
+        karta = karta[karta.find("-") + 2:karta.find(")") + 1]
+        karta = (karta[karta.find('(') + 1:karta.find(')')] + karta[:karta.find("(") - 1]).replace("'", ". ")
+        karty.append(karta)
+
     if len(karty) > 0:
         kartyStr = "ČK: "
+        for karta in karty:
+            kartyStr += karta + ", "
+        return kartyStr[:-2]
+
+def getStringZK(playersList):
+    karty = []
+    for x in playersList.find_all('div', {"class": "action fl ac-zltakarta"}):
+        karta = x['title']
+        karta = karta[karta.find("-") + 2:karta.find(")") + 1]
+        karta = (karta[karta.find('(') + 1:karta.find(')')] + karta[:karta.find("(") - 1]).replace("'", ". ")
+        karty.append(karta)
+
+    if len(karty) > 0:
+        kartyStr = "ŽK: "
         for karta in karty:
             kartyStr += karta + ", "
         return kartyStr[:-2]
@@ -493,9 +511,17 @@ def main(soup, liga, skratky):
     if liga == 'pat':
         rozhodca = getStringRozhodca(soup)
         divaci = getStringDivaci(soup)
-        karty = getStringKarty(playersList)
-        if karty != None:
-            zapas.append(getStringGoly(playersList, zostavy, skratky, liga) + str(rozhodca) + ", " + str(divaci) + ", " + karty)
+        CK = getStringCK(playersList)
+        ZK = getStringZK(playersList)
+        if CK != None or ZK != None:
+            if CK != None and ZK != None:
+                zapas.append(getStringGoly(playersList, zostavy, skratky, liga) + str(rozhodca) + ", " + str(divaci) + ", " + ZK + ", " + CK)
+                zapas.append(getStringZaklad(nacitajZaklad(playersList, zostavy, skratky)))
+                return zapas
+            if CK != None:
+                zapas.append(getStringGoly(playersList, zostavy, skratky, liga) + str(rozhodca) + ", " + str(divaci) + ", " + CK)
+            if ZK != None:
+                zapas.append(getStringGoly(playersList, zostavy, skratky, liga) + str(rozhodca) + ", " + str(divaci) + ", " + ZK)
         else:
             zapas.append(getStringGoly(playersList, zostavy, skratky, liga) + str(rozhodca) + ", " + str(divaci))
         zapas.append(getStringZaklad(nacitajZaklad(playersList, zostavy, skratky)))
@@ -563,7 +589,7 @@ def getStringVystup(url, liga, skratky):
     loop = asyncio.get_event_loop()
     return loop.run_until_complete(async_crawler(urls, liga, skratky))
 
-#vystup = getStringVystup('http://www.zsfz.sk/sutaz/1875/?part=2782&round=60196', 'pat', True)
-#for i in vystup:
-#    for x in i:
-#        print(x)
+vystup = getStringVystup('http://obfz-nove-zamky.futbalnet.sk/sutaz/1832/?part=3106&round=57831', 'pat', True)
+for i in vystup:
+    for x in i:
+        print(x)
