@@ -4,6 +4,7 @@ from urllib.request import urlopen
 from bs4 import BeautifulSoup
 from collections import Counter
 import asyncio
+import sys
 
 def getStringSuperi(soup):
     muzstva = soup.find_all('div', {"class": "team-title"})
@@ -89,21 +90,24 @@ def urobBezSkratiek(zostava, frekventovane):
 def urobSkratky(zostava, frekventovane):
     meno = ""
     skratene = []
-    for i in zostava:
-        x = i.split()
-        meno = str(x[0][0:1]) + ". "
-        x = x[1:]
-        for j in x:
-            meno += j + " "
-        skratene.append(meno[:-1])
+    try:
+        for i in zostava:
+            x = i.split()
+            meno = str(x[0][0:1]) + ". "
+            x = x[1:]
+            for j in x:
+                meno += j + " "
+            skratene.append(meno[:-1])
 
-    for i in frekventovane:
-        count = 0
-        while (count < len(skratene)):
-            x = skratene[count].split()
-            if ''.join(i) == x[len(x) - 1]:
-                skratene[count] = zostava[count]
-            count += 1
+        for i in frekventovane:
+            count = 0
+            while (count < len(skratene)):
+                x = skratene[count].split()
+                if ''.join(i) == x[len(x) - 1]:
+                    skratene[count] = zostava[count]
+                count += 1
+    except IndexError:
+        print("Unexpected error:", sys.exc_info()[0])
 
     return skratene
 
@@ -165,10 +169,13 @@ def upravStriedaniaSkr(striedania, frekvetovane):
 
     count = 0
     i = 0
-    while (count < len(striedania)):
-        striedania[count] = upravene[i] + casy[count] + upravene[i+1] + ")"
-        count +=1
-        i+=2
+    try:
+        while (count < len(striedania)):
+            striedania[count] = upravene[i] + casy[count] + upravene[i+1] + ")"
+            count +=1
+            i+=2
+    except IndexError:
+        print("Unexpected error:", sys.exc_info()[0])
 
     return striedania
 
@@ -589,7 +596,7 @@ def getStringVystup(url, liga, skratky):
     loop = asyncio.get_event_loop()
     return loop.run_until_complete(async_crawler(urls, liga, skratky))
 
-vystup = getStringVystup('http://obfz-nove-zamky.futbalnet.sk/sutaz/1832/?part=3106&round=57831', 'pat', True)
+vystup = getStringVystup('http://obfz-nitra.futbalnet.sk/sutaz/2095/', 'pat', True)
 for i in vystup:
     for x in i:
         print(x)
