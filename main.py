@@ -5,6 +5,10 @@ from bs4 import BeautifulSoup
 from collections import Counter
 import asyncio
 import sys
+import os, ssl
+if (not os.environ.get('PYTHONHTTPSVERIFY', '') and
+    getattr(ssl, '_create_unverified_context', None)):
+    ssl._create_default_https_context = ssl._create_unverified_context
 
 def getStringSuperi(soup):
     muzstva = soup.find_all('div', {"class": "team-title"})
@@ -551,7 +555,7 @@ async def async_crawler(urls, liga, skratky):
 
 def overVstupy(url, liga):
     if url[:3] == 'www' and len(url) >2:
-        url = 'http://' + url
+        url = 'https://' + url
 
     if len(url) == 0:
         return 0
@@ -562,7 +566,7 @@ def overVstupy(url, liga):
     if len(url) == 0 and len(liga) == 0:
         return 2
 
-    if url[:7] != 'https://' or len(url) < 7:
+    if url[:8] != 'https://' or len(url) < 7:
         return 3
 
     urls = nacitanieURLs(url)
@@ -597,4 +601,9 @@ def getStringVystup(url, liga, skratky):
     loop = asyncio.get_event_loop()
     return loop.run_until_complete(async_crawler(urls, liga, skratky))
 
-vystup = getStringVystup('http://obfz-nitra.futbalnet.sk/sutaz/2224/?part=3744&round=75863', 'pat', False)
+vystup = getStringVystup('https://www.zsfz.sk/sutaz/2197/?part=3652&round=78353', 'pat', False)
+#print (vystup)
+
+#for i in vystup:
+#    for x in i:
+#        print(x)
