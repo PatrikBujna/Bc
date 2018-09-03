@@ -184,17 +184,15 @@ def upravStriedaniaSkr(striedania, frekvetovane):
     return striedania
 
 def upravHracov(mena, frekventovane):
-    print(mena)
-    for i, hrac in enumerate(mena):
-        x = hrac.split()
-        mena[i] = x[-1]
-
     for frek in frekventovane:
         for i, hrac in enumerate(mena):
             x = hrac.split()
             if frek == x[-1]:
-                mena[i] = x[0][:1] + ". " + ''.join(x[0:])
+                mena[i] = x[0][:1] + ". " + ''.join(x[1:])
 
+    for i, meno in enumerate(mena):
+        if meno.find(".") < 0:
+            mena[i] = meno.split()[-1]
     return mena
 
 def upravStriedaniaBezSkr(striedania, frekventovane):
@@ -601,7 +599,7 @@ def getStringVystup(url, liga, skratky):
     loop = asyncio.get_event_loop()
     return loop.run_until_complete(async_crawler(urls, liga, skratky))
 
-vystup = getStringVystup('https://www.zsfz.sk/sutaz/2197/?part=3652&round=78353', 'pat', False)
+vystup = getStringVystup('https://obfz-nitra.futbalnet.sk/sutaz/2224/?part=3744&round=75863', 'pat', False)
 #print (vystup)
 
 #for i in vystup:
