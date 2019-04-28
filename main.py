@@ -599,7 +599,7 @@ def getStringVystup(url, liga, skratky):
     loop = asyncio.get_event_loop()
     return loop.run_until_complete(async_crawler(urls, liga, skratky))
 
-vystup = getStringVystup('https://obfz-nitra.futbalnet.sk/sutaz/2224/?part=3744&round=75863', 'pat', False)
+#vystup = getStringVystup('https://obfz-nitra.futbalnet.sk/sutaz/2224/?part=3744&round=75863', 'pat', False)
 #print (vystup)
 
 #for i in vystup:
